@@ -17,6 +17,7 @@ return [
             Model\CategoriesTable::class => Factory\CategoriesTableFactory::class,
             Model\CategoriesTableGateway::class => Model\CategoriesTableGateway::class,
             Service\CategoriesServiceInterface::class => Factory\CategoriesServiceFactory::class,
+            Service\XmlServiceInterface::class => Factory\XmlServiceFactory::class,
         ],
     ],
     'controllers' => [

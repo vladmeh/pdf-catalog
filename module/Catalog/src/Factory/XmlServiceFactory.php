@@ -9,20 +9,21 @@
 
 namespace Catalog\Factory;
 
-use Catalog\Controller\CatalogController;
-use Catalog\Service\CategoriesServiceInterface;
 
-use Catalog\Service\XmlServiceInterface;
+use Catalog\Model\CategoriesTable;
+use Catalog\Service\XmlService;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
-class CatalogControllerFactory implements FactoryInterface
+class XmlServiceFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        return new CatalogController(
-            $container->get(CategoriesServiceInterface::class),
-            $container->get(XmlServiceInterface::class)
+        $simpleXMLElement = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><root/>');
+
+        return new XmlService(
+            $container->get(CategoriesTable::class),
+            $simpleXMLElement
         );
     }
 }

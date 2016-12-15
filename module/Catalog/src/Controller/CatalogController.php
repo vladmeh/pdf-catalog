@@ -12,7 +12,9 @@ namespace Catalog\Controller;
 
 use Catalog\Model\CategoriesTable;
 use Catalog\Service\CategoriesServiceInterface;
+use Catalog\Service\XmlServiceInterface;
 use Zend\Debug\Debug;
+use Zend\Http\Response;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\JsonModel;
 
@@ -23,9 +25,15 @@ class CatalogController extends AbstractActionController
      */
     private $categoriesService;
 
-    public function __construct(CategoriesServiceInterface $categoriesService)
+    private $xmlService;
+
+    public function __construct(
+        CategoriesServiceInterface $categoriesService,
+        XmlServiceInterface $xmlService
+    )
     {
         $this->categoriesService = $categoriesService;
+        $this->xmlService = $xmlService;
     }
 
     public function indexAction()
@@ -75,15 +83,13 @@ class CatalogController extends AbstractActionController
 
     public function testAction()
     {
-        $id = $this->params()->fromQuery('categories');
+        $response = new Response();
+        $response->getHeaders()->addHeaderLine('Content-Type', 'text/xml; charset=utf-8');
 
-        try {
-            $result = $this->categoriesService->fetchTreeCategories($id);
-        } catch (\InvalidArgumentException $ex) {
-            return $this->redirect()->toRoute('catalog');
-        }
+        $xml = $this->xmlService->getXml();
 
-        return new JsonModel($result);
+        $response->setContent($this->xmlService->output($xml));
+        return $response;
     }
 
 }
