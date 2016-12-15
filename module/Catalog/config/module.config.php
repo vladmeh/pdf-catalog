@@ -10,9 +10,20 @@
 namespace Catalog;
 
 use Zend\Router\Http\Segment;
-use Zend\ServiceManager\Factory\InvokableFactory;
 
 return [
+    'service_manager' => [
+        'factories' => [
+            Model\CategoriesTable::class => Factory\CategoriesTableFactory::class,
+            Model\CategoriesTableGateway::class => Model\CategoriesTableGateway::class,
+            Service\CategoriesServiceInterface::class => Factory\CategoriesServiceFactory::class,
+        ],
+    ],
+    'controllers' => [
+        'factories' => [
+            Controller\CatalogController::class => Factory\CatalogControllerFactory::class,
+        ],
+    ],
     'router' => [
         'routes' => [
             'catalog' => [

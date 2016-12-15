@@ -25,23 +25,12 @@ class CategoriesTable
         $this->tableGateway = $tableGateway;
     }
 
-    public function fetchAll($toArray = false)
+    public function fetchAll()
     {
-        $result = $this->tableGateway->select(function (Select $select){
-                $select->where(['active' => 1, 'deleted' => 0]);
-                $select->order('sorting ASC');
-            });
-
-        if ($toArray){
-            $resultArray = [];
-
-            foreach ($result as $item)
-                $resultArray[] = $item;
-
-            return $resultArray;
-        }
-
-        return $result;
+        return $this->tableGateway->select(function (Select $select){
+            $select->where(['active' => 1, 'deleted' => 0]);
+            $select->order('sorting ASC');
+        });
     }
 
     public function getCategory($id)
@@ -59,29 +48,18 @@ class CategoriesTable
         return $row;
     }
 
-    public function fetchSubCategories($id, $toArray = false)
+    public function fetchSubCategories($id)
     {
         $id = (int) $id;
 
-        $result = $this->tableGateway->select(function (Select $select) use ($id){
-            $select->where([
-                'active' => 1,
-                'deleted' => 0,
-                'parent_id' => $id
-            ]);
-            $select->order('sorting ASC');
-        });
-
-        if ($toArray){
-            $resultArray = [];
-
-            foreach ($result as $item)
-                $resultArray[] = $item;
-
-            return $resultArray;
-        }
-
-        return $result;
+        return $this->tableGateway->select(function (Select $select) use ($id){
+                    $select->where([
+                        'active' => 1,
+                        'deleted' => 0,
+                        'parent_id' => $id
+                    ]);
+                    $select->order('sorting ASC');
+                });
     }
 
 }

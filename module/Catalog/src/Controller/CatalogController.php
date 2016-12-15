@@ -11,9 +11,9 @@ namespace Catalog\Controller;
 
 
 use Catalog\Model\CategoriesTable;
+use Catalog\Service\CategoriesServiceInterface;
 use Zend\Debug\Debug;
 use Zend\Mvc\Controller\AbstractActionController;
-use Zend\View\Model\ViewModel;
 use Zend\View\Model\JsonModel;
 
 class CatalogController extends AbstractActionController
@@ -21,49 +21,69 @@ class CatalogController extends AbstractActionController
     /**
      * @var CategoriesTable
      */
-    private $table;
+    private $categoriesService;
 
-    public function __construct(CategoriesTable $table)
+    public function __construct(CategoriesServiceInterface $categoriesService)
     {
-        $this->table = $table;
+        $this->categoriesService = $categoriesService;
     }
 
     public function indexAction()
     {
-        //Debug::dump($categories);die();
+        //Debug::dump($this->categoriesService->fetchAll(true));die();
 
-        return new JsonModel($this->table->fetchAll(true));
+        return new JsonModel($this->categoriesService->fetchAll(true));
+    }
+
+    public function viewAction(){
+        $id = $this->params()->fromRoute('id');
+
+        try {
+            $category = $this->categoriesService->getCategory($id);
+        } catch (\InvalidArgumentException $ex) {
+            return $this->redirect()->toRoute('catalog');
+        }
+
+        return new JsonModel((array) $category);
     }
 
     public function categoriesAction()
     {
         $id = $this->params()->fromRoute('id');
 
-        return new JsonModel($this->table->fetchSubCategories($id, true));
+        try {
+            $category = $this->categoriesService->fetchSubCategories($id, true);
+        } catch (\InvalidArgumentException $ex) {
+            return $this->redirect()->toRoute('catalog');
+        }
+
+        return new JsonModel($category);
+    }
+
+    public function treeAction()
+    {
+        $id = $this->params()->fromRoute('id');
+
+        try {
+            $result = $this->categoriesService->fetchTreeCategories($id);
+        } catch (\InvalidArgumentException $ex) {
+            return $this->redirect()->toRoute('catalog');
+        }
+
+        return new JsonModel($result);
     }
 
     public function testAction()
     {
-        //Debug::dump($request->fromQuery());die();
         $id = $this->params()->fromQuery('categories');
-        return new JsonModel($this->recursiveGroupTreeCategories($id));
-    }
 
-    public function recursiveGroupTreeCategories($id, $level = 0)
-    {
-        $result = array();
-        $resultSet = $this->table->fetchSubCategories($id, true);
-
-        foreach ($resultSet as $item) {
-            $item->level = $level;
-            $subCategories = $this->table->fetchSubCategories($item->id, true);
-            if(0 != count($subCategories) && $level < 2){
-                $item->subCategories = $this->recursiveGroupTreeCategories($item->id, $level+1);
-            }
-            $result[] = $item;
+        try {
+            $result = $this->categoriesService->fetchTreeCategories($id);
+        } catch (\InvalidArgumentException $ex) {
+            return $this->redirect()->toRoute('catalog');
         }
 
-        return $result;
+        return new JsonModel($result);
     }
 
 }
