@@ -9,13 +9,35 @@
 
 namespace Catalog;
 
+use Interop\Container\ContainerInterface;
+use Zend\Db\Adapter\AdapterInterface;
+use Zend\Db\ResultSet\ResultSet;
+use Zend\Db\TableGateway\TableGateway;
 use Zend\Router\Http\Segment;
 
 return [
     'service_manager' => [
         'factories' => [
-            Model\CategoriesTable::class => Factory\CategoriesTableFactory::class,
-            Model\CategoriesTableGateway::class => Model\CategoriesTableGateway::class,
+            Model\CategoriesTable::class => function(ContainerInterface $container) {
+                $tableGateway = $container->get(Model\CategoriesTableGateway::class);
+                return new Model\CategoriesTable($tableGateway);
+            },
+            Model\CategoriesTableGateway::class => function (ContainerInterface $container) {
+                $dbAdapter = $container->get(AdapterInterface::class);
+                $resultSetPrototype = new ResultSet();
+                $resultSetPrototype->setArrayObjectPrototype(new Model\Categories());
+                return new TableGateway('categories', $dbAdapter, null, $resultSetPrototype);
+            },
+            Model\ProductsTable::class => function(ContainerInterface $container) {
+                $tableGateway = $container->get(Model\ProductsTableGateway::class);
+                return new Model\ProductsTable($tableGateway);
+            },
+            Model\ProductsTableGateway::class => function (ContainerInterface $container) {
+                $dbAdapter = $container->get(AdapterInterface::class);
+                $resultSetPrototype = new ResultSet();
+                $resultSetPrototype->setArrayObjectPrototype(new Model\Products());
+                return new TableGateway('products', $dbAdapter, null, $resultSetPrototype);
+            },
             Service\CategoriesServiceInterface::class => Factory\CategoriesServiceFactory::class,
             Service\XmlServiceInterface::class => Factory\XmlServiceFactory::class,
         ],
