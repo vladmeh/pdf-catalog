@@ -25,6 +25,9 @@ class CatalogController extends AbstractActionController
      */
     private $categoriesService;
 
+    /**
+     * @var XmlServiceInterface
+     */
     private $xmlService;
 
     public function __construct(
@@ -81,15 +84,32 @@ class CatalogController extends AbstractActionController
         return new JsonModel($result);
     }
 
-    public function testAction()
+    public function xmlAction()
     {
+        $id = $this->params()->fromRoute('id');
+
         $response = new Response();
         $response->getHeaders()->addHeaderLine('Content-Type', 'text/xml; charset=utf-8');
 
         $xml = $this->xmlService->getXml();
+        $xml->addChild('catalog', 'Alpha-Hydro');
 
-        $response->setContent($this->xmlService->output($xml));
+        $tocXml = $xml->addChild('table_of_content');
+        $this->xmlService->setSubCategoriesTree($id, $tocXml);
+
+        $file_dir = __DIR__.'/../../../../data/xml';
+        if(!file_exists($file_dir))
+            mkdir($file_dir, 0755, true);
+
+        $file_name = $file_dir.'/test.xml';
+
+        $response->setContent($this->xmlService->output($xml, $file_name));
         return $response;
+    }
+
+    public function testAction()
+    {
+
     }
 
 }

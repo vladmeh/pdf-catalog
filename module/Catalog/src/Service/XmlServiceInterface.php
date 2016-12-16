@@ -13,10 +13,28 @@ namespace Catalog\Service;
 interface XmlServiceInterface
 {
     /**
+     * @param $category_id
+     * @param null|\SimpleXMLElement $xmlElement
+     * @return null|\SimpleXMLElement
+     */
+    public function setSubCategoriesById($category_id, $xmlElement = null);
+
+    /**
+     * @param $category_id
+     * @param null|\SimpleXMLElement $xmlElement
+     * @return null|\SimpleXMLElement
+     */
+    public function setSubCategoriesTree($category_id, $xmlElement = null);
+
+    /**
      * @param $xml \SimpleXMLElement
+     * @param string | null $toFile
      * @return mixed
      */
-    public function output($xml);
+    public function output($xml = null, $toFile = null);
 
+    /**
+     * @return \SimpleXMLElement
+     */
     public function getXml();
 }

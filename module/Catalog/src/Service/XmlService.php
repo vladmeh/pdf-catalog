@@ -31,14 +31,59 @@ class XmlService implements XmlServiceInterface
         $this->_xml = $simpleXMLElement;
     }
 
+
+    /**
+     * @param $category_id
+     * @param null|\SimpleXMLElement $xmlElement
+     * @return null|\SimpleXMLElement
+     */
+    public function setSubCategoriesById($category_id, $xmlElement = null)
+    {
+        $id = (int) $category_id;
+
+        if(is_null($xmlElement))
+            $xmlElement = $this->getXml();
+
+        $resultSet = $this->_categoriesTable->fetchSubCategories($id);
+        foreach ($resultSet as $item) {
+            $category = $xmlElement->addChild('category');
+            $category->addAttribute('id', $item->id);
+            $category->addAttribute('name', $item->name);
+        }
+
+        return $xmlElement;
+    }
+
+    public function setSubCategoriesTree($category_id, $xmlElement = null, $level = 1)
+    {
+        $id = (int) $category_id;
+
+        if(is_null($xmlElement))
+            $xmlElement = $this->getXml();
+
+        $resultSet = $this->_categoriesTable->fetchSubCategories($id);
+        foreach ($resultSet as $item) {
+            $category = $xmlElement->addChild('category',$item->name);
+            $category->addAttribute('id', $item->id);
+            //$category->addAttribute('name', $item->name);
+            $category->addAttribute('level', $level);
+            $subCategory = $this->_categoriesTable->fetchSubCategories($item->id);
+            if(0 != $subCategory->count() && $level < 3)
+                $this->setSubCategoriesTree($item->id, $category, $level+1);
+        }
+
+        return $xmlElement;
+    }
+
     /**
      * @param \SimpleXMLElement $xml
      * @param  string | null $toFile
      * @return mixed
      */
-    public function output($xml, $toFile = null)
+    public function output($xml = null, $toFile = null)
     {
-        $xml->addChild('catalog', 'pdf');
+        if(is_null($xml))
+            $xml = $this->getXml();
 
         if($toFile)
             $xml->asXML($toFile);
@@ -56,10 +101,12 @@ class XmlService implements XmlServiceInterface
 
     /**
      * @param \SimpleXMLElement $xml
+     * @return $this
      */
     public function setXml($xml)
     {
         $this->_xml = $xml;
+        return $this;
     }
 
 }

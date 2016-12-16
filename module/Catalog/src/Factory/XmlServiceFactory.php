@@ -19,7 +19,11 @@ class XmlServiceFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $simpleXMLElement = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><root/>');
+        $simpleXMLElement = new \SimpleXMLElement(
+            '<?xml version="1.0" encoding="UTF-8"?>
+            <!--<?xml-stylesheet type="text/xsl" href="catalog.xsl" ?>-->
+            <root/>'
+        );
 
         return new XmlService(
             $container->get(CategoriesTable::class),
