@@ -10,19 +10,16 @@
 namespace Catalog\Factory;
 
 
-use Catalog\Model\CategoriesTable;
 use Catalog\Model\ProductsTable;
-use Catalog\Service\CategoriesService;
-
+use Catalog\Service\ProductService;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
-class CategoriesServiceFactory implements FactoryInterface
+class ProductsServiceFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        return new CategoriesService(
-            $container->get(CategoriesTable::class),
+        return new ProductService(
             $container->get(ProductsTable::class)
         );
     }

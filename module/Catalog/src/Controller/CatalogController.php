@@ -12,6 +12,7 @@ namespace Catalog\Controller;
 
 use Catalog\Model\CategoriesTable;
 use Catalog\Service\CategoriesServiceInterface;
+use Catalog\Service\ProductsServiceInterface;
 use Catalog\Service\XmlServiceInterface;
 use Zend\Debug\Debug;
 use Zend\Http\Response;
@@ -21,9 +22,14 @@ use Zend\View\Model\JsonModel;
 class CatalogController extends AbstractActionController
 {
     /**
-     * @var CategoriesTable
+     * @var CategoriesServiceInterface
      */
     private $categoriesService;
+
+    /**
+     * @var ProductsServiceInterface
+     */
+    private $productsService;
 
     /**
      * @var XmlServiceInterface
@@ -32,10 +38,12 @@ class CatalogController extends AbstractActionController
 
     public function __construct(
         CategoriesServiceInterface $categoriesService,
+        ProductsServiceInterface $productsService,
         XmlServiceInterface $xmlService
     )
     {
         $this->categoriesService = $categoriesService;
+        $this->productsService = $productsService;
         $this->xmlService = $xmlService;
     }
 
@@ -109,7 +117,11 @@ class CatalogController extends AbstractActionController
 
     public function testAction()
     {
+        $id = $this->params()->fromRoute('id');
+        $result = $this->categoriesService->fetchCategoryProducts($id);
 
+        //Debug::dump($result);die();
+        return new JsonModel($result);
     }
 
 }

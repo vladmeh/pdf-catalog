@@ -27,6 +27,13 @@ interface XmlServiceInterface
     public function setSubCategoriesTree($category_id, $xmlElement = null);
 
     /**
+     * @param $category_id
+     * @param \SimpleXMLElement $xmlElement
+     * @return \SimpleXMLElement
+     */
+    public function setCategoryProducts($category_id, $xmlElement);
+
+    /**
      * @param $xml \SimpleXMLElement
      * @param string | null $toFile
      * @return mixed

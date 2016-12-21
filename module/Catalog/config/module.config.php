@@ -39,6 +39,7 @@ return [
                 return new TableGateway('products', $dbAdapter, null, $resultSetPrototype);
             },
             Service\CategoriesServiceInterface::class => Factory\CategoriesServiceFactory::class,
+            Service\ProductsServiceInterface::class => Factory\ProductsServiceFactory::class,
             Service\XmlServiceInterface::class => Factory\XmlServiceFactory::class,
         ],
     ],

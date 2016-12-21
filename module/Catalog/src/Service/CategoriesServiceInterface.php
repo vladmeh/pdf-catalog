@@ -9,15 +9,17 @@
 
 namespace Catalog\Service;
 
-
 use Catalog\Model\Categories;
+use Catalog\Model\Products;
+use Zend\Db\ResultSet\ResultSet;
 
 interface CategoriesServiceInterface
 {
     /**
-     * @return array | Categories[]
+     * @param bool $toArray
+     * @return Categories[]|ResultSet
      */
-    public function fetchAll();
+    public function fetchAll($toArray = false);
 
     /**
      * @param $id
@@ -27,13 +29,21 @@ interface CategoriesServiceInterface
 
     /**
      * @param $id
-     * @return array | Categories[]
+     * @param bool $toArray
+     * @return Categories[]|ResultSet
      */
-    public function fetchSubCategories($id);
+    public function fetchSubCategories($id, $toArray = false);
 
     /**
      * @param $id
      * @return array | Categories[]
      */
     public function fetchTreeCategories($id);
+
+    /**
+     * @param $id
+     * @param null $products
+     * @return array|Products[]
+     */
+    public function fetchCategoryProducts($id, &$products = null);
 }

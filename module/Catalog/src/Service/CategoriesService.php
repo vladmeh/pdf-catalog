@@ -12,33 +12,41 @@ namespace Catalog\Service;
 
 use Catalog\Model\Categories;
 use Catalog\Model\CategoriesTable;
+use Catalog\Model\ProductsTable;
+use Zend\Db\ResultSet\ResultSet;
 
 class CategoriesService implements CategoriesServiceInterface
 {
 
+    /**
+     * @var CategoriesTable
+     */
     private $_categoriesTable;
 
-    public function __construct(CategoriesTable $categoriesTable)
+    /**
+     * @var ProductsTable
+     */
+    private $_productsTable;
+
+    public function __construct(
+        CategoriesTable $categoriesTable,
+        ProductsTable $productsTable
+    )
     {
         $this->_categoriesTable = $categoriesTable;
+        $this->_productsTable = $productsTable;
     }
 
     /**
      * @param bool $toArray
-     * @return array | Categories[]
+     * @return ResultSet | Categories[]
      */
     public function fetchAll($toArray = false)
     {
         $result = $this->_categoriesTable->fetchAll();
 
-        if ($toArray){
-            $resultArray = [];
-
-            foreach ($result as $item)
-                $resultArray[] = $item;
-
-            return $resultArray;
-        }
+        if ($toArray)
+            return $this->_toArray($result);
 
         return $result;
     }
@@ -55,20 +63,14 @@ class CategoriesService implements CategoriesServiceInterface
     /**
      * @param $id
      * @param bool $toArray
-     * @return array | Categories[]
+     * @return ResultSet | Categories[]
      */
     public function fetchSubCategories($id, $toArray = false)
     {
         $result = $this->_categoriesTable->fetchSubCategories($id);
 
-        if ($toArray){
-            $resultArray = [];
-
-            foreach ($result as $item)
-                $resultArray[] = $item;
-
-            return $resultArray;
-        }
+        if ($toArray)
+            return $this->_toArray($result);
 
         return $result;
     }
@@ -89,8 +91,45 @@ class CategoriesService implements CategoriesServiceInterface
             if(0 != count($subCategories) && $level < 2){
                 $item->subCategories = $this->fetchTreeCategories($item->id, $level+1);
             }
+            else{
+                $item->products = $this->fetchCategoryProducts($item->id);
+            }
             $result[] = $item;
         }
+
+        return $result;
+    }
+
+
+    public function fetchCategoryProducts($id, &$result = null)
+    {
+        if(is_null($result))
+            $result = [];
+
+        $productCategory = $this->_productsTable->fetchProductsByCategory($id);
+        if(0 != $productCategory->count())
+            $result = array_merge($result, $this->_toArray($productCategory));
+
+        $subCategories = $this->_categoriesTable->fetchSubCategories($id);
+        if(0 != $subCategories->count()){
+            foreach ($subCategories as $subCategory){
+                $productSubCategory = $this->_productsTable->fetchProductsByCategory($subCategory->id);
+                $result = array_merge($result, $this->_toArray($productSubCategory));
+                $children = $this->_categoriesTable->fetchSubCategories($subCategory->id);
+                if(0 != $children->count())
+                    $this->fetchCategoryProducts($subCategory->id, $result);
+            }
+        }
+
+        return $result;
+    }
+
+    private function _toArray(ResultSet $resultSet)
+    {
+        $result = [];
+
+        foreach ($resultSet as $item)
+            $result[] = $item;
 
         return $result;
     }

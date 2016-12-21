@@ -11,6 +11,7 @@ namespace Catalog\Factory;
 
 
 use Catalog\Model\CategoriesTable;
+use Catalog\Model\ProductsTable;
 use Catalog\Service\XmlService;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
@@ -27,6 +28,7 @@ class XmlServiceFactory implements FactoryInterface
 
         return new XmlService(
             $container->get(CategoriesTable::class),
+            $container->get(ProductsTable::class),
             $simpleXMLElement
         );
     }

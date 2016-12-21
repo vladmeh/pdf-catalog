@@ -11,6 +11,8 @@ namespace Catalog\Service;
 
 
 use Catalog\Model\CategoriesTable;
+use Catalog\Model\ProductsTable;
+use Zend\Db\ResultSet\ResultSet;
 
 class XmlService implements XmlServiceInterface
 {
@@ -20,14 +22,21 @@ class XmlService implements XmlServiceInterface
      */
     private $_categoriesTable;
 
+    /**
+     * @var ProductsTable
+     */
+    private $_productsTable;
+
     private $_xml;
 
     public function __construct(
         CategoriesTable $categoriesTable,
+        ProductsTable $productsTable,
         \SimpleXMLElement $simpleXMLElement
     )
     {
         $this->_categoriesTable = $categoriesTable;
+        $this->_productsTable = $productsTable;
         $this->_xml = $simpleXMLElement;
     }
 
@@ -68,11 +77,51 @@ class XmlService implements XmlServiceInterface
             //$category->addAttribute('name', $item->name);
             $category->addAttribute('level', $level);
             $subCategory = $this->_categoriesTable->fetchSubCategories($item->id);
-            if(0 != $subCategory->count() && $level < 3)
+            if(0 != $subCategory->count() && $level < 3){
                 $this->setSubCategoriesTree($item->id, $category, $level+1);
+            }
+            else{
+                $products = $category->addChild('products');
+                $this->setCategoryProducts($item->id, $products);
+            }
         }
 
         return $xmlElement;
+    }
+
+    /**
+     * @param $category_id
+     * @param \SimpleXMLElement $xmlElement
+     * @return \SimpleXMLElement
+     */
+    public function setCategoryProducts($category_id, $xmlElement)
+    {
+        $productCategory = $this->_productsTable->fetchProductsByCategory($category_id);
+        if(0 != $productCategory->count())
+            $this->setProducts($productCategory, $xmlElement);
+
+        $subCategories = $this->_categoriesTable->fetchSubCategories($category_id);
+        if(0 != $subCategories->count()){
+            foreach ($subCategories as $subCategory){
+                $productSubCategory = $this->_productsTable->fetchProductsByCategory($subCategory->id);
+                if(0 != $productSubCategory)
+                    $this->setProducts($productSubCategory, $xmlElement);
+
+                $children = $this->_categoriesTable->fetchSubCategories($subCategory->id);
+                if(0 != $children->count())
+                    $this->setCategoryProducts($subCategory->id, $xmlElement);
+            }
+        }
+
+        return $xmlElement;
+    }
+
+    public function setProducts(ResultSet $resultSet, \SimpleXMLElement $element)
+    {
+        foreach ($resultSet as $arrayObject)
+            $element->addChild('product')->addAttribute('name', $arrayObject->name);
+
+        return $this;
     }
 
     /**
