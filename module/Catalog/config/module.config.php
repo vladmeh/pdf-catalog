@@ -38,8 +38,19 @@ return [
                 $resultSetPrototype->setArrayObjectPrototype(new Model\Products());
                 return new TableGateway('products', $dbAdapter, null, $resultSetPrototype);
             },
+            Model\ProductParamsTable::class => function(ContainerInterface $container) {
+                $tableGateway = $container->get(Model\ProductParamsTableGateway::class);
+                return new Model\ProductParamsTable($tableGateway);
+            },
+            Model\ProductParamsTableGateway::class => function(ContainerInterface $container) {
+                $dbAdapter = $container->get(AdapterInterface::class);
+                $resultSetPrototype = new ResultSet();
+                $resultSetPrototype->setArrayObjectPrototype(new Model\ProductParams());
+                return new TableGateway('product_params', $dbAdapter, null, $resultSetPrototype);
+            },
             Service\CategoriesServiceInterface::class => Factory\CategoriesServiceFactory::class,
             Service\ProductsServiceInterface::class => Factory\ProductsServiceFactory::class,
+            Service\ProductParamsServiceInterface::class => Factory\ProductParamsServiceFactory::class,
             Service\XmlServiceInterface::class => Factory\XmlServiceFactory::class,
         ],
     ],

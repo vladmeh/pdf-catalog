@@ -11,6 +11,7 @@ namespace Catalog\Service;
 
 
 use Catalog\Model\CategoriesTable;
+use Catalog\Model\Products;
 use Catalog\Model\ProductsTable;
 use Zend\Db\ResultSet\ResultSet;
 
@@ -72,17 +73,18 @@ class XmlService implements XmlServiceInterface
 
         $resultSet = $this->_categoriesTable->fetchSubCategories($id);
         foreach ($resultSet as $item) {
-            $category = $xmlElement->addChild('category',$item->name);
-            $category->addAttribute('id', $item->id);
-            //$category->addAttribute('name', $item->name);
-            $category->addAttribute('level', $level);
+            $categoryXml = $xmlElement->addChild('category');
+            $categoryXml->addAttribute('id', $item->id);
+            $categoryXml->addAttribute('name', $item->name);
+            $categoryXml->addAttribute('level', $level);
             $subCategory = $this->_categoriesTable->fetchSubCategories($item->id);
             if(0 != $subCategory->count() && $level < 3){
-                $this->setSubCategoriesTree($item->id, $category, $level+1);
+                $this->setSubCategoriesTree($item->id, $categoryXml, $level+1);
             }
             else{
-                $products = $category->addChild('products');
-                $this->setCategoryProducts($item->id, $products);
+                $categoryXml->addAttribute('path', 'http://alpha-hydro.com/catalog/'.$item->fullPath);
+                //$products = $category->addChild('products');
+                $this->setCategoryProducts($item->id, $categoryXml);
             }
         }
 
@@ -116,10 +118,35 @@ class XmlService implements XmlServiceInterface
         return $xmlElement;
     }
 
-    public function setProducts(ResultSet $resultSet, \SimpleXMLElement $element)
+    /**
+     * @param arrayObject Products[] | ResultSet
+     * @param \SimpleXMLElement $element
+     * @return $this
+     */
+    public function setProducts($resultSet, \SimpleXMLElement $element)
     {
-        foreach ($resultSet as $arrayObject)
-            $element->addChild('product')->addAttribute('name', $arrayObject->name);
+        foreach ($resultSet as $arrayObject){
+            $productXml = $element->addChild('product');
+            $this->setProduct($arrayObject, $productXml);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Products $productObject
+     * @param \SimpleXMLElement $productXml
+     * @return $this
+     */
+    public function setProduct(Products $productObject, \SimpleXMLElement $productXml)
+    {
+        $productXml->addAttribute('id', $productObject->id);
+        $productXml->addChild('sku', $productObject->sku);
+        $productXml->addChild('name', $productObject->name);
+        $productXml->addChild('image', $productObject->image)->addAttribute('path', $productObject->uploadPath);
+
+        if($productObject->draft)
+            $productXml->addChild('draft', $productObject->draft)->addAttribute('path', $productObject->uploadPathDraft);
 
         return $this;
     }

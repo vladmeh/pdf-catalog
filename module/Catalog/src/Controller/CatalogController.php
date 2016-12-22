@@ -12,6 +12,7 @@ namespace Catalog\Controller;
 
 use Catalog\Model\CategoriesTable;
 use Catalog\Service\CategoriesServiceInterface;
+use Catalog\Service\ProductParamsServiceInterface;
 use Catalog\Service\ProductsServiceInterface;
 use Catalog\Service\XmlServiceInterface;
 use Zend\Debug\Debug;
@@ -31,6 +32,11 @@ class CatalogController extends AbstractActionController
      */
     private $productsService;
 
+     /**
+     * @var ProductParamsServiceInterface
+     */
+    private $productParamsService;
+
     /**
      * @var XmlServiceInterface
      */
@@ -39,11 +45,13 @@ class CatalogController extends AbstractActionController
     public function __construct(
         CategoriesServiceInterface $categoriesService,
         ProductsServiceInterface $productsService,
+        ProductParamsServiceInterface $productParamsService,
         XmlServiceInterface $xmlService
     )
     {
         $this->categoriesService = $categoriesService;
         $this->productsService = $productsService;
+        $this->productParamsService = $productParamsService;
         $this->xmlService = $xmlService;
     }
 
@@ -102,8 +110,8 @@ class CatalogController extends AbstractActionController
         $xml = $this->xmlService->getXml();
         $xml->addChild('catalog', 'Alpha-Hydro');
 
-        $tocXml = $xml->addChild('table_of_content');
-        $this->xmlService->setSubCategoriesTree($id, $tocXml);
+        //$tocXml = $xml->addChild('table_of_content');
+        $this->xmlService->setSubCategoriesTree($id, $xml);
 
         $file_dir = __DIR__.'/../../../../data/xml';
         if(!file_exists($file_dir))
@@ -118,10 +126,10 @@ class CatalogController extends AbstractActionController
     public function testAction()
     {
         $id = $this->params()->fromRoute('id');
-        $result = $this->categoriesService->fetchCategoryProducts($id);
+        $result = $this->productParamsService->fetchAll(true);
 
-        //Debug::dump($result);die();
-        return new JsonModel($result);
+        Debug::dump($result);die();
+        //return new JsonModel($result);
     }
 
 }

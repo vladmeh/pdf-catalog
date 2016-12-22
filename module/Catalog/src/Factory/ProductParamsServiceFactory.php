@@ -11,17 +11,15 @@ namespace Catalog\Factory;
 
 
 use Catalog\Model\ProductParamsTable;
-use Catalog\Model\ProductsTable;
-use Catalog\Service\ProductService;
+use Catalog\Service\ProductParamsService;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
-class ProductsServiceFactory implements FactoryInterface
+class ProductParamsServiceFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        return new ProductService(
-            $container->get(ProductsTable::class),
+        return new ProductParamsService(
             $container->get(ProductParamsTable::class)
         );
     }

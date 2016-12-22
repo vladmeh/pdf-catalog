@@ -12,6 +12,7 @@ namespace Catalog\Factory;
 use Catalog\Controller\CatalogController;
 use Catalog\Service\CategoriesServiceInterface;
 
+use Catalog\Service\ProductParamsServiceInterface;
 use Catalog\Service\ProductsServiceInterface;
 use Catalog\Service\XmlServiceInterface;
 use Interop\Container\ContainerInterface;
@@ -24,6 +25,7 @@ class CatalogControllerFactory implements FactoryInterface
         return new CatalogController(
             $container->get(CategoriesServiceInterface::class),
             $container->get(ProductsServiceInterface::class),
+            $container->get(ProductParamsServiceInterface::class),
             $container->get(XmlServiceInterface::class)
         );
     }

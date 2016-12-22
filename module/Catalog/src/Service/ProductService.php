@@ -10,6 +10,7 @@
 namespace Catalog\Service;
 
 
+use Catalog\Model\ProductParamsTable;
 use Catalog\Model\Products;
 use Catalog\Model\ProductsTable;
 use Zend\Db\ResultSet\ResultSet;
@@ -21,14 +22,23 @@ class ProductService implements ProductsServiceInterface
      */
     private $_productsTable;
 
-    public function __construct(ProductsTable $productsTable)
+    /**
+     * @var ProductParamsTable
+     */
+    private $_productParamsTable;
+
+    public function __construct(
+        ProductsTable $productsTable,
+        ProductParamsTable $productParamsTable
+    )
     {
         $this->_productsTable = $productsTable;
+        $this->_productParamsTable = $productParamsTable;
     }
 
     /**
      * @param bool $toArray
-     * @return array|\Zend\Db\ResultSet\ResultSet
+     * @return Products[]|ResultSet
      */
     public function fetchAll($toArray = false)
     {
