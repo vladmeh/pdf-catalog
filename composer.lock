@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "5398592cf9aace160af80eb1444e73ff",
-    "content-hash": "9d1b57b5a8b77da017b6ab0f011ece75",
+    "hash": "de99423f4709e02263d3e215d9f82f92",
+    "content-hash": "7439bbfff97ff93fd2766a0da41d2e49",
     "packages": [
         {
             "name": "container-interop/container-interop",
@@ -1466,6 +1466,63 @@
                 "zf2"
             ],
             "time": "2016-05-31 20:47:48"
+        },
+        {
+            "name": "zendframework/zend-serializer",
+            "version": "2.8.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zendframework/zend-serializer.git",
+                "reference": "ff74ea020f5f90866eb28365327e9bc765a61a6e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zendframework/zend-serializer/zipball/ff74ea020f5f90866eb28365327e9bc765a61a6e",
+                "reference": "ff74ea020f5f90866eb28365327e9bc765a61a6e",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.6 || ^7.0",
+                "zendframework/zend-json": "^2.5 || ^3.0",
+                "zendframework/zend-stdlib": "^2.7 || ^3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.5",
+                "squizlabs/php_codesniffer": "^2.3.1",
+                "zendframework/zend-math": "^2.6",
+                "zendframework/zend-servicemanager": "^2.7.5 || ^3.0.3"
+            },
+            "suggest": {
+                "zendframework/zend-math": "(^2.6 || ^3.0) To support Python Pickle serialization",
+                "zendframework/zend-servicemanager": "(^2.7.5 || ^3.0.3) To support plugin manager support"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.8-dev",
+                    "dev-develop": "2.9-dev"
+                },
+                "zf": {
+                    "component": "Zend\\Serializer",
+                    "config-provider": "Zend\\Serializer\\ConfigProvider"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Zend\\Serializer\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "provides an adapter based interface to simply generate storable representation of PHP types by different facilities, and recover",
+            "homepage": "https://github.com/zendframework/zend-serializer",
+            "keywords": [
+                "serializer",
+                "zf2"
+            ],
+            "time": "2016-06-21 17:01:55"
         },
         {
             "name": "zendframework/zend-servicemanager",

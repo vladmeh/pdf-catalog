@@ -17,21 +17,21 @@ interface XmlServiceInterface
      * @param null|\SimpleXMLElement $xmlElement
      * @return null|\SimpleXMLElement
      */
-    public function setSubCategoriesById($category_id, $xmlElement = null);
+    public function getXmlSubCategoriesById($category_id, $xmlElement = null);
 
     /**
      * @param $category_id
      * @param null|\SimpleXMLElement $xmlElement
      * @return null|\SimpleXMLElement
      */
-    public function setSubCategoriesTree($category_id, $xmlElement = null);
+    public function getXmlSubCategoriesTree($category_id, $xmlElement = null);
 
     /**
      * @param $category_id
      * @param \SimpleXMLElement $xmlElement
      * @return \SimpleXMLElement
      */
-    public function setCategoryProducts($category_id, $xmlElement);
+    public function getXmlCategoryProducts($category_id, $xmlElement);
 
     /**
      * @param $xml \SimpleXMLElement
@@ -44,4 +44,16 @@ interface XmlServiceInterface
      * @return \SimpleXMLElement
      */
     public function getXml();
+
+    /**
+     * @param array $productParams
+     * @return array
+     */
+    public function setProductParams($productParams);
+
+    /**
+     * @param array $modificationsTable
+     * @return array
+     */
+    public function setModificationsTable($modificationsTable);
 }

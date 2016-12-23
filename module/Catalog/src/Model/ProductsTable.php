@@ -79,4 +79,20 @@ class ProductsTable
         });
 
     }
+
+    public function fetchAllModificationParamValues()
+    {
+        return $this->tableGateway->select(function(Select $select) {
+            $select
+                ->columns(['productId' => 'id'])
+                ->join('subproduct_params', 'products.id = subproduct_params.product_id', ['paramName' => 'name'])
+                ->join('subproduct_params_values', 'subproduct_params.id = subproduct_params_values.param_id', ['paramValue' => 'value'])
+                ->join('subproducts', 'subproduct_params_values.subproduct_id = subproducts.id', ['modificationName' => 'sku'])
+                ->where([
+                    'products.active' => 1,
+                    'products.deleted' => 0
+                ])
+                ->order('subproduct_params.order ASC');
+        });
+    }
 }

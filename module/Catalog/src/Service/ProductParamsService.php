@@ -11,6 +11,7 @@ namespace Catalog\Service;
 
 
 use Catalog\Model\ProductParamsTable;
+use Zend\Cache\Storage\Adapter\Filesystem;
 use Zend\Db\ResultSet\ResultSet;
 
 class ProductParamsService implements ProductParamsServiceInterface
@@ -20,24 +21,41 @@ class ProductParamsService implements ProductParamsServiceInterface
      */
     private $_productParamsTable;
 
-    public function __construct(ProductParamsTable $productParamsTable)
+    /**
+     * @var Filesystem
+     */
+    private $_cache;
+
+
+    public function __construct(
+        ProductParamsTable $productParamsTable,
+        Filesystem $filesystem
+    )
     {
         $this->_productParamsTable = $productParamsTable;
+        $this->_cache = $filesystem;
     }
 
     /**
      * @param bool $toArray
-     * @return ProductParamsTable[]|ResultSet
+     * @return array|ResultSet
      */
     public function fetchAll($toArray = false)
     {
         $result = $this->_productParamsTable->fetchAll();
 
         if ($toArray) {
-            $resultArray = [];
 
-            foreach ($result as $item)
-                $resultArray[] = $item;
+            $keyCache = 'productParams';
+            $resultArray = $this->_cache->getItem($keyCache, $success);
+
+            if(!$success){
+                $resultArray = [];
+                foreach ($result as $item)
+                    $resultArray[$item->productId][$item->name] = $item->value;
+
+                $this->_cache->setItem($keyCache, $resultArray);
+            }
 
             return $resultArray;
         }

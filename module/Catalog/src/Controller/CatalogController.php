@@ -10,8 +10,8 @@
 namespace Catalog\Controller;
 
 
-use Catalog\Model\CategoriesTable;
 use Catalog\Service\CategoriesServiceInterface;
+use Catalog\Service\ModificationsServiceInterface;
 use Catalog\Service\ProductParamsServiceInterface;
 use Catalog\Service\ProductsServiceInterface;
 use Catalog\Service\XmlServiceInterface;
@@ -37,6 +37,11 @@ class CatalogController extends AbstractActionController
      */
     private $productParamsService;
 
+     /**
+     * @var ModificationsServiceInterface
+     */
+    private $modificationService;
+
     /**
      * @var XmlServiceInterface
      */
@@ -46,12 +51,14 @@ class CatalogController extends AbstractActionController
         CategoriesServiceInterface $categoriesService,
         ProductsServiceInterface $productsService,
         ProductParamsServiceInterface $productParamsService,
+        ModificationsServiceInterface $modificationsService,
         XmlServiceInterface $xmlService
     )
     {
         $this->categoriesService = $categoriesService;
         $this->productsService = $productsService;
         $this->productParamsService = $productParamsService;
+        $this->modificationService = $modificationsService;
         $this->xmlService = $xmlService;
     }
 
@@ -104,14 +111,17 @@ class CatalogController extends AbstractActionController
     {
         $id = $this->params()->fromRoute('id');
 
-        $response = new Response();
-        $response->getHeaders()->addHeaderLine('Content-Type', 'text/xml; charset=utf-8');
+        $productParams = $this->productParamsService->fetchAll(true);
+        $this->xmlService->setProductParams($productParams);
+
+        $modificationTable = $this->modificationService->fetchAll(true);
+        $this->xmlService->setModificationsTable($modificationTable);
 
         $xml = $this->xmlService->getXml();
         $xml->addChild('catalog', 'Alpha-Hydro');
 
         //$tocXml = $xml->addChild('table_of_content');
-        $this->xmlService->setSubCategoriesTree($id, $xml);
+        $this->xmlService->getXmlSubCategoriesTree($id, $xml);
 
         $file_dir = __DIR__.'/../../../../data/xml';
         if(!file_exists($file_dir))
@@ -119,14 +129,17 @@ class CatalogController extends AbstractActionController
 
         $file_name = $file_dir.'/test.xml';
 
+        $response = new Response();
+        $response->getHeaders()->addHeaderLine('Content-Type', 'text/xml; charset=utf-8');
         $response->setContent($this->xmlService->output($xml, $file_name));
+
         return $response;
     }
 
     public function testAction()
     {
         $id = $this->params()->fromRoute('id');
-        $result = $this->productParamsService->fetchAll(true);
+        $result = $this->modificationService->fetchAll(true);
 
         Debug::dump($result);die();
         //return new JsonModel($result);

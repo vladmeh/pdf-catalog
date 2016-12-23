@@ -85,4 +85,20 @@ class ProductService implements ProductsServiceInterface
 
         return $result;
     }
+
+    public function fetchAllModificationParamValues($toArray = false)
+    {
+        $result = $this->_productsTable->fetchAllModificationParamValues();
+
+        if($toArray){
+            $resultArray = [];
+
+            foreach ($result as $item)
+                $resultArray[] = $item;
+
+            return $resultArray;
+        }
+
+        return $result;
+    }
 }

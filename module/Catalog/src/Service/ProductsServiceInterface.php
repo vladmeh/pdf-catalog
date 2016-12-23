@@ -32,4 +32,6 @@ interface ProductsServiceInterface
      * @return ResultSet | Products[]
      */
     public function fetchProductsByCategory($category_id, $toArray = false);
+
+    public function fetchAllModificationParamValues($toArray = false);
 }

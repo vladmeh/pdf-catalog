@@ -9,19 +9,18 @@
 
 namespace Catalog\Factory;
 
-
-use Catalog\Model\ProductParamsTable;
-use Catalog\Service\ProductParamsService;
+use Catalog\Model\ModificationsTable;
+use Catalog\Service\ModificationService;
 use Interop\Container\ContainerInterface;
 use Zend\Cache\StorageFactory;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
-class ProductParamsServiceFactory implements FactoryInterface
+class ModificationsServiceFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        return new ProductParamsService(
-            $container->get(ProductParamsTable::class),
+        return new ModificationService(
+            $container->get(ModificationsTable::class),
             $container->get(StorageFactory::class)
         );
     }

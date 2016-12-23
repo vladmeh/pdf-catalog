@@ -10,6 +10,7 @@
 namespace Catalog;
 
 use Interop\Container\ContainerInterface;
+use Zend\Cache\StorageFactory;
 use Zend\Db\Adapter\AdapterInterface;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\TableGateway\TableGateway;
@@ -48,10 +49,37 @@ return [
                 $resultSetPrototype->setArrayObjectPrototype(new Model\ProductParams());
                 return new TableGateway('product_params', $dbAdapter, null, $resultSetPrototype);
             },
+            Model\ModificationsTable::class => function(ContainerInterface $container){
+                $tableGateway = $container->get(Model\ModificationsTableGateway::class);
+                return new Model\ModificationsTable($tableGateway);
+            },
+            Model\ModificationsTableGateway::class => function(ContainerInterface $container){
+                $dbAdapter = $container->get(AdapterInterface::class);
+                $resultSetPrototype = new ResultSet();
+                $resultSetPrototype->setArrayObjectPrototype(new Model\Modifications());
+                return new TableGateway('products', $dbAdapter, null, $resultSetPrototype);
+            },
             Service\CategoriesServiceInterface::class => Factory\CategoriesServiceFactory::class,
             Service\ProductsServiceInterface::class => Factory\ProductsServiceFactory::class,
             Service\ProductParamsServiceInterface::class => Factory\ProductParamsServiceFactory::class,
+            Service\ModificationsServiceInterface::class => Factory\ModificationsServiceFactory::class,
             Service\XmlServiceInterface::class => Factory\XmlServiceFactory::class,
+            StorageFactory::class => function(){
+                return StorageFactory::factory([
+                    'adapter' => [
+                        'name' => 'filesystem',
+                        'options' => [
+                            'cache_dir' => __DIR__ . '/../../../data/cache'
+                        ],
+                    ],
+                    'plugins' => [
+                        'exception_handler' => [
+                            'throw_exceptions' => false,
+                        ],
+                        'Serializer'
+                    ],
+                ]);
+            },
         ],
     ],
     'controllers' => [

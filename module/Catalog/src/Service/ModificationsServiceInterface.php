@@ -10,13 +10,14 @@
 namespace Catalog\Service;
 
 
+use Catalog\Model\Modifications;
 use Zend\Db\ResultSet\ResultSet;
 
-interface ProductParamsServiceInterface
+interface ModificationsServiceInterface
 {
     /**
      * @param bool $toArray
-     * @return array | ResultSet
+     * @return Modifications[]|ResultSet
      */
     public function fetchAll($toArray = false);
 }

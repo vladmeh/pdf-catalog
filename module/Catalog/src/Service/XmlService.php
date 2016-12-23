@@ -11,8 +11,11 @@ namespace Catalog\Service;
 
 
 use Catalog\Model\CategoriesTable;
+use Catalog\Model\ProductParamsTable;
 use Catalog\Model\Products;
 use Catalog\Model\ProductsTable;
+use Zend\Cache\Storage\Adapter\Filesystem;
+use Zend\Cache\StorageFactory;
 use Zend\Db\ResultSet\ResultSet;
 
 class XmlService implements XmlServiceInterface
@@ -28,16 +31,45 @@ class XmlService implements XmlServiceInterface
      */
     private $_productsTable;
 
+    /**
+     * @var ProductParamsTable
+     */
+    private $_productParamsTable;
+
+
+    /**
+     * @var \SimpleXMLElement
+     */
     private $_xml;
+
+
+    /**
+     * @var StorageFactory
+     */
+    private $_cache;
+
+    /**
+     * @var array
+     */
+    protected $productParams = [];
+
+    /**
+     * @var array
+     */
+    protected $modificationsTable = [];
 
     public function __construct(
         CategoriesTable $categoriesTable,
         ProductsTable $productsTable,
+        ProductParamsTable $productParamsTable,
+        Filesystem $storageFactory,
         \SimpleXMLElement $simpleXMLElement
     )
     {
         $this->_categoriesTable = $categoriesTable;
         $this->_productsTable = $productsTable;
+        $this->_productParamsTable = $productParamsTable;
+        $this->_cache = $storageFactory;
         $this->_xml = $simpleXMLElement;
     }
 
@@ -47,7 +79,7 @@ class XmlService implements XmlServiceInterface
      * @param null|\SimpleXMLElement $xmlElement
      * @return null|\SimpleXMLElement
      */
-    public function setSubCategoriesById($category_id, $xmlElement = null)
+    public function getXmlSubCategoriesById($category_id, $xmlElement = null)
     {
         $id = (int) $category_id;
 
@@ -64,7 +96,7 @@ class XmlService implements XmlServiceInterface
         return $xmlElement;
     }
 
-    public function setSubCategoriesTree($category_id, $xmlElement = null, $level = 1)
+    public function getXmlSubCategoriesTree($category_id, $xmlElement = null, $level = 1)
     {
         $id = (int) $category_id;
 
@@ -79,12 +111,12 @@ class XmlService implements XmlServiceInterface
             $categoryXml->addAttribute('level', $level);
             $subCategory = $this->_categoriesTable->fetchSubCategories($item->id);
             if(0 != $subCategory->count() && $level < 3){
-                $this->setSubCategoriesTree($item->id, $categoryXml, $level+1);
+                $this->getXmlSubCategoriesTree($item->id, $categoryXml, $level+1);
             }
             else{
                 $categoryXml->addAttribute('path', 'http://alpha-hydro.com/catalog/'.$item->fullPath);
                 //$products = $category->addChild('products');
-                $this->setCategoryProducts($item->id, $categoryXml);
+                $this->getXmlCategoryProducts($item->id, $categoryXml);
             }
         }
 
@@ -96,22 +128,22 @@ class XmlService implements XmlServiceInterface
      * @param \SimpleXMLElement $xmlElement
      * @return \SimpleXMLElement
      */
-    public function setCategoryProducts($category_id, $xmlElement)
+    public function getXmlCategoryProducts($category_id, $xmlElement)
     {
         $productCategory = $this->_productsTable->fetchProductsByCategory($category_id);
         if(0 != $productCategory->count())
-            $this->setProducts($productCategory, $xmlElement);
+            $this->getXmlProducts($productCategory, $xmlElement);
 
         $subCategories = $this->_categoriesTable->fetchSubCategories($category_id);
         if(0 != $subCategories->count()){
             foreach ($subCategories as $subCategory){
                 $productSubCategory = $this->_productsTable->fetchProductsByCategory($subCategory->id);
                 if(0 != $productSubCategory)
-                    $this->setProducts($productSubCategory, $xmlElement);
+                    $this->getXmlProducts($productSubCategory, $xmlElement);
 
                 $children = $this->_categoriesTable->fetchSubCategories($subCategory->id);
                 if(0 != $children->count())
-                    $this->setCategoryProducts($subCategory->id, $xmlElement);
+                    $this->getXmlCategoryProducts($subCategory->id, $xmlElement);
             }
         }
 
@@ -123,11 +155,11 @@ class XmlService implements XmlServiceInterface
      * @param \SimpleXMLElement $element
      * @return $this
      */
-    public function setProducts($resultSet, \SimpleXMLElement $element)
+    public function getXmlProducts($resultSet, \SimpleXMLElement $element)
     {
         foreach ($resultSet as $arrayObject){
             $productXml = $element->addChild('product');
-            $this->setProduct($arrayObject, $productXml);
+            $this->getXmlProduct($arrayObject, $productXml);
         }
 
         return $this;
@@ -138,7 +170,7 @@ class XmlService implements XmlServiceInterface
      * @param \SimpleXMLElement $productXml
      * @return $this
      */
-    public function setProduct(Products $productObject, \SimpleXMLElement $productXml)
+    public function getXmlProduct(Products $productObject, \SimpleXMLElement $productXml)
     {
         $productXml->addAttribute('id', $productObject->id);
         $productXml->addChild('sku', $productObject->sku);
@@ -148,7 +180,21 @@ class XmlService implements XmlServiceInterface
         if($productObject->draft)
             $productXml->addChild('draft', $productObject->draft)->addAttribute('path', $productObject->uploadPathDraft);
 
+        $productProperies = $this->getProductParams();
+        if ($productProperies[$productObject->id]){
+            $propertiesXml = $productXml->addChild('properties');
+            $this->getXmlProductProperties($productProperies[$productObject->id], $propertiesXml);
+        }
+
         return $this;
+    }
+
+    public function getXmlProductProperties($arrayProductProperties, \SimpleXMLElement $propertiesXml)
+    {
+        foreach ($arrayProductProperties as $name => $value)
+            $propertiesXml->addChild('property', $value)->addAttribute('name', $name);
+
+        return $propertiesXml;
     }
 
     /**
@@ -183,6 +229,40 @@ class XmlService implements XmlServiceInterface
     {
         $this->_xml = $xml;
         return $this;
+    }
+
+
+    public function setProductParams($productParams)
+    {
+        $this->productParams = $productParams;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getProductParams()
+    {
+        return $this->productParams;
+    }
+
+
+    /**
+     * @param array $modificationsTable
+     * @return XmlService
+     */
+    public function setModificationsTable($modificationsTable)
+    {
+        $this->modificationsTable = $modificationsTable;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getModificationsTable()
+    {
+        return $this->modificationsTable;
     }
 
 }
