@@ -23,14 +23,14 @@
         "zendframework/zend-mvc-form": "^1.0",
         "zendframework/zend-navigation": "^2.8",
         "zendframework/zend-debug": "^2.5",
-        "dompdf/dompdf": "^0.7.0",
-        "zendframework/zend-serializer": "^2.8"
+        "zendframework/zend-serializer": "^2.8",
+        "tecnickcom/tcpdf": "^6.2",
+        "vladmeh/zf3-tcpdf": "dev-master"
     },
     "autoload": {
         "psr-4": {
             "Application\\": "module/Application/src/",
-            "Catalog\\": "module/Catalog/src/",
-            "Pdf\\": "module/Pdf/src/"
+            "Catalog\\": "module/Catalog/src/"
         }
     },
     "autoload-dev": {

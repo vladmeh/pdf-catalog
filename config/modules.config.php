@@ -19,7 +19,7 @@ return [
     'Zend\Cache',
     'Zend\Router',
     'Zend\Validator',
+    'TCPDFModule',
     'Application',
     'Catalog',
-    'Pdf'
 ];

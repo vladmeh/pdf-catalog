@@ -39,6 +39,7 @@ class ModificationsTable
                 ->join('subproduct_params_values', 'subproduct_params.id = subproduct_params_values.param_id', ['paramValue' => 'value'])
                 ->join('subproducts', 'subproduct_params_values.subproduct_id = subproducts.id', ['modificationName' => 'sku'])
                 ->where([
+                    'subproducts.deleted' => 0,
                     'products.active' => 1,
                     'products.deleted' => 0
                 ])

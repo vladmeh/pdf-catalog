@@ -180,10 +180,16 @@ class XmlService implements XmlServiceInterface
         if($productObject->draft)
             $productXml->addChild('draft', $productObject->draft)->addAttribute('path', $productObject->uploadPathDraft);
 
-        $productProperies = $this->getProductParams();
-        if ($productProperies[$productObject->id]){
+        $productProperies = $this->productParams[$productObject->id];
+        if ($productProperies){
             $propertiesXml = $productXml->addChild('properties');
-            $this->getXmlProductProperties($productProperies[$productObject->id], $propertiesXml);
+            $this->getXmlProductProperties($productProperies, $propertiesXml);
+        }
+
+        $modificationsTable = $this->modificationsTable[$productObject->id];
+        if ($modificationsTable){
+            $modificationsTableXml = $productXml->addChild('modifications');
+            $this->getXmlProductModificationsTable($modificationsTable, $modificationsTableXml);
         }
 
         return $this;
@@ -196,6 +202,25 @@ class XmlService implements XmlServiceInterface
 
         return $propertiesXml;
     }
+
+    public function getXmlProductModificationsTable($arrayModificationsTable, \SimpleXMLElement $modificationsTableXml)
+    {
+        $columnsXml = $modificationsTableXml->addChild('columns');
+        $columnsXml->addChild('column', 'Наименование');
+        foreach ($arrayModificationsTable['columns'] as $column){
+            $columnsXml->addChild('column', $column);
+        }
+
+        $rowsXml = $modificationsTableXml->addChild('rows');
+        foreach ($arrayModificationsTable['rows'] as $sku => $values){
+            $rowXml = $rowsXml->addChild('row');
+            $rowXml->addChild('value', $sku);
+            foreach ($values as $value) {
+                $rowXml->addChild('value', $value);
+            }
+        }
+    }
+
 
     /**
      * @param \SimpleXMLElement $xml
