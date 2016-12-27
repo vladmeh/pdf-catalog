@@ -11,14 +11,19 @@ namespace Application\Factory;
 
 
 use Application\Controller\IndexController;
-use Dompdf\Dompdf;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
+use Zend\View\Renderer\RendererInterface;
 
 class IndexControllerFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        return new IndexController($container->get(Dompdf::class));
+        $tcpdf = $container->get(\TCPDF::class);
+        $renderer = $container->get(RendererInterface::class);
+        return new IndexController(
+            $tcpdf,
+            $renderer
+        );
     }
 }
