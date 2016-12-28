@@ -14,13 +14,15 @@ use Interop\Container\ContainerInterface;
 use Pdf\Controller\PdfController;
 use Pdf\Service\PdfServiceInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
+use Zend\View\Renderer\RendererInterface;
 
 class PdfControllerFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         return new PdfController(
-            $container->get(PdfServiceInterface::class)
+            $container->get(PdfServiceInterface::class),
+            $container->get(RendererInterface::class)
         );
     }
 }
