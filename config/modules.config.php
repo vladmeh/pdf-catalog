@@ -22,4 +22,5 @@ return [
     'TCPDFModule',
     'Application',
     'Catalog',
+    'Pdf',
 ];

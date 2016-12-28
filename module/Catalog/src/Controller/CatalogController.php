@@ -139,10 +139,34 @@ class CatalogController extends AbstractActionController
     public function testAction()
     {
         $id = $this->params()->fromRoute('id');
-        $result = $this->modificationService->fetchAll(true);
+        $result = simplexml_load_file(__DIR__.'/../../../../data/xml/test.xml');
 
-        Debug::dump($result);die();
+        echo $result->catalog.'<br/>';
+
+        $xmlElement = $result->category;
+        echo $this->_getXmlCategory($xmlElement);
+
+        //Debug::dump($result);die();
         //return new JsonModel($result);
+    }
+
+    /**
+     * @param array $xmlElements
+     * @return string
+     */
+    private function _getXmlCategory($xmlElements)
+    {
+        $html = '<ul>';
+
+        foreach ($xmlElements as $item) {
+            $html .= '<li>'.$item->attributes()->name;
+            if($item->category)
+                $html .= $this->_getXmlCategory($item->category);
+            $html .= '</li>';
+        }
+        $html .= '</ul>';
+
+        return $html;
     }
 
 }
