@@ -49,6 +49,12 @@ class PdfController extends AbstractActionController
         $html = $this->renderer->render($view);
         $pdf->introduction($html);
 
+        //Вынести в конструктор
+        //Проверка на существование файла
+        //Если файла нет перенаправление на создание файла
+        $xmlObject = simplexml_load_file(__DIR__.'/../../../../data/xml/test.xml');
+        $pdf->content($xmlObject);
+
         $pdf->Output('catalog.pdf', 'I');
     }
 

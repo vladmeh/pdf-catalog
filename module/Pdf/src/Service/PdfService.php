@@ -10,6 +10,8 @@
 namespace Pdf\Service;
 
 
+use Zend\Debug\Debug;
+
 class PdfService extends \TCPDF implements PdfServiceInterface
 {
     /**
@@ -77,6 +79,8 @@ class PdfService extends \TCPDF implements PdfServiceInterface
         parent::Output($name, $dest);
     }
 
+
+
     public function defaultSettingsPage()
     {
         $this->SetCreator('Alpha-Hydro');
@@ -116,10 +120,112 @@ class PdfService extends \TCPDF implements PdfServiceInterface
     {
         $this->SetHeaderData('', 0, 'Введение', '');
         $this->AddPage();
+        $this->Bookmark('Введение', 0 , '', '', 'B', [237, 133, 31]);
         $this->writeHTML($html);
         $this->lastPage();
 
         return $this;
+    }
+
+    public function content(\SimpleXMLElement $xmlObject)
+    {
+        $xmlElements = $xmlObject->category;
+
+        foreach ($xmlElements as $level1) {
+            $this->setHeaderData('', 0, $level1->attributes()->name, '');
+            $this->setImageFieldBookmark('fieldBookmark_'.(string) $level1->attributes()->id.'.png');
+            $this->AddPage();
+            $this->Bookmark($level1->attributes()->name, 0 , '', '', 'B', [237, 133, 31]);
+            if($level1->category){
+                foreach ($level1->category as $level2) {
+                    $this->setHeaderData('', 0, $level2->attributes()->name, '');
+                    $this->Bookmark($level2->attributes()->name, 1 , 0, '', 'B', [0, 0, 0]);
+                    if($level2->category){
+                        foreach ($level2->category as $level3) {
+                            $this->Bookmark($level3->attributes()->name, 2 , 0, '', '', [0, 0, 0]);
+                            //$this->Cell(0, 0, 'продуктов - '.count($level3->product), 0, 1, 'L');
+                            if(0 != count($level3->product)){
+                                foreach ($level3->product as $item) {
+                                    $this->product($item);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+       //Debug::dump($this->outlines);die();
+
+        $this->tableOfContent();
+//
+        return $this;
+    }
+
+    public function product(\SimpleXMLElement $xmlElement)
+    {
+        $this->SetFont('arialnarrow', 'B', 16);
+        $this->Cell(0, 0, $xmlElement->sku, 0, 1, 'L');
+
+        $this->SetFontSize(12);
+        //$this->SetDrawColor(237, 133, 31); //orange
+        //$this->SetDrawColor(0, 141, 210); //blue
+        $this->SetDrawColor(160,160,160); //gray
+        $this->SetLineWidth(0.1);
+
+        $this->Cell(0, 0, $xmlElement->name, 'B', 1, 'L');
+
+        $this->Ln(5);
+
+        $image_file = __DIR__ .'/../../../..'.$xmlElement->image->attributes()->path.(string) $xmlElement->image;
+        $this->Image($image_file,$this->x,$this->y,'', 25, '', '', 'T');
+
+        $this->SetX($this->x + 5);
+
+        if($xmlElement->draft){
+            $image_draft = __DIR__ .'/../../../..'.$xmlElement->draft->attributes()->path.(string) $xmlElement->draft;
+            if(file_exists($image_draft))
+                $this->Image($image_draft,$this->x,$this->y, '', 25, '', '', 'T',true,190);
+            $this->SetX($this->x + 5);
+        }
+
+        $this->SetY($this->getImageRBY()+5);
+        $this->Ln(5);
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function tableOfContent()
+    {
+        $this->SetHeaderData('', 0, 'Содержание', '');
+        $this->addTOCPage();
+        $this->SetFont('arialnarrow', '', 12);
+        $this->addTOC(2, 'arialnarrow', '.', 'Содержание', '', array(128,0,0));
+        $this->endTOCPage();
+
+        return $this;
+    }
+
+    /**
+     * @param array $xmlElements
+     * @return string
+     */
+    private function _getHtmlCategory($xmlElements)
+    {
+        $html = '<ul>';
+
+        foreach ($xmlElements as $item) {
+            $html .= '<li>'.$item->attributes()->name;
+            if($item->category)
+                $html .= $this->_getHtmlCategory($item->category);
+            $html .= '</li>';
+        }
+        $html .= '</ul>';
+
+        return $html;
     }
 
     /**
@@ -133,7 +239,7 @@ class PdfService extends \TCPDF implements PdfServiceInterface
     }
 
     /**
-     * @param string $image_field_bookmark
+     * @param $image_field_bookmark
      * @return PdfService
      */
     public function setImageFieldBookmark($image_field_bookmark)

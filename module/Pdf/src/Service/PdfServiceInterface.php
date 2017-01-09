@@ -17,4 +17,6 @@ interface PdfServiceInterface
     public function defaultSettingsPage();
 
     public function introduction($html);
+
+    public function content(\SimpleXMLElement $xmlObject);
 }
