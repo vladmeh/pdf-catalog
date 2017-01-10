@@ -55,7 +55,7 @@ class PdfController extends AbstractActionController
         $xmlObject = simplexml_load_file(__DIR__.'/../../../../data/xml/test.xml');
         $pdf->content($xmlObject);
 
-        $pdf->Output('catalog.pdf', 'I');
+        $pdf->Output('/catalog.pdf', 'F');
     }
 
     public function testAction()
