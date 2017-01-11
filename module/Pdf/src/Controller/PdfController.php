@@ -22,12 +22,14 @@ class PdfController extends AbstractActionController
     /**
      * @var PdfServiceInterface
      */
-    private $pdfService;
+    protected $pdfService;
 
     /**
      * @var RendererInterface
      */
     protected $renderer;
+
+    private $_progress;
 
     public function __construct(
         PdfServiceInterface $pdfService,
@@ -60,16 +62,40 @@ class PdfController extends AbstractActionController
 
     public function testAction()
     {
-        $id = $this->params()->fromRoute('id');
-        $result = simplexml_load_file(__DIR__.'/../../../../data/xml/test.xml');
+       /* $i = 1;
+        while ($i <= 10) {
+            sleep(3);
+            $this->setProgress($i);
+        }*/
 
-        echo $result->catalog.'<br/>';
+        return new ViewModel();
+    }
 
-        $xmlElement = $result->category;
-        echo $this->_getXmlCategory($xmlElement);
 
-        //Debug::dump($result);die();
-        //return new JsonModel($result);
+    public function liveTimeAction()
+    {
+        $time = date("H:i:s", time());
+
+        $data = new JsonModel(array(
+            'time' => $time,
+        ));
+        return $data;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProgress()
+    {
+        return $this->_progress;
+    }
+
+    /**
+     * @param mixed $progress
+     */
+    public function setProgress($progress)
+    {
+        $this->_progress = $progress;
     }
 
     /**

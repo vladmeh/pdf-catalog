@@ -17,11 +17,6 @@
             ->prependStylesheet($this->basePath('css/bootstrap.min.css'))
         ?>
 
-        <!-- Scripts -->
-        <?= $this->headScript()
-            ->prependFile($this->basePath('js/bootstrap.min.js'))
-            ->prependFile($this->basePath('js/jquery-3.1.0.min.js'))
-        ?>
     </head>
     <body>
         <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -50,6 +45,11 @@
                 <p>&copy; 2005 - <?= date('Y') ?> by Zend Technologies Ltd. All rights reserved.</p>
             </footer>
         </div>
+        <!-- Scripts -->
+        <?= $this->headScript()
+            ->prependFile($this->basePath('js/bootstrap.min.js'))
+            ->prependFile($this->basePath('js/jquery-3.1.0.min.js'))
+        ?>
         <?= $this->inlineScript() ?>
     </body>
 </html>
