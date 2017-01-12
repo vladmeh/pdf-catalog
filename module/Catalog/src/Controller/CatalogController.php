@@ -18,6 +18,7 @@ use Catalog\Service\XmlServiceInterface;
 use Zend\Debug\Debug;
 use Zend\Http\Response;
 use Zend\Mvc\Controller\AbstractActionController;
+use Zend\View\Model\ViewModel;
 use Zend\View\Model\JsonModel;
 
 class CatalogController extends AbstractActionController
@@ -127,13 +128,19 @@ class CatalogController extends AbstractActionController
         if(!file_exists($file_dir))
             mkdir($file_dir, 0755, true);
 
-        $file_name = $file_dir.'/test.xml';
+        $file_name = $file_dir.'/catalog'.$id.'.xml';
 
-        $response = new Response();
+        /*$response = new Response();
         $response->getHeaders()->addHeaderLine('Content-Type', 'text/xml; charset=utf-8');
         $response->setContent($this->xmlService->output($xml, $file_name));
 
-        return $response;
+        return $response;*/
+
+        $this->xmlService->output($xml, $file_name);
+
+        return new JsonModel([
+            '_link' => $file_name
+        ]);
     }
 
     public function testAction()

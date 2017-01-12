@@ -42,6 +42,8 @@ class PdfController extends AbstractActionController
 
     public function indexAction()
     {
+        $id = $this->params()->fromRoute('id');
+
         $pdf = $this->pdfService;
         $pdf->defaultSettingsPage();
 
@@ -51,13 +53,22 @@ class PdfController extends AbstractActionController
         $html = $this->renderer->render($view);
         $pdf->introduction($html);
 
+        $xmlFileDir = __DIR__.'/../../../../data/xml';
+        $xmlFileName = 'catalog'.$id.'.xml';
+
         //Вынести в конструктор
         //Проверка на существование файла
         //Если файла нет перенаправление на создание файла
-        $xmlObject = simplexml_load_file(__DIR__.'/../../../../data/xml/test.xml');
+        $xmlObject = simplexml_load_file($xmlFileDir.'/'.$xmlFileName);
         $pdf->content($xmlObject);
 
-        $pdf->Output('/catalog.pdf', 'F');
+        $file_dir = __DIR__.'/../../../../data/pdf';
+        if(!file_exists($file_dir))
+            mkdir($file_dir, 0755, true);
+
+        $file_name = 'catalog'.$id.'.pdf';
+
+        $pdf->Output($file_dir.'/'.$file_name, 'F');
     }
 
     public function testAction()
