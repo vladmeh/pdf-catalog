@@ -43,7 +43,7 @@ return [
     ],
     'view_manager' => [
         'template_path_stack' => [
-            'catalog' => __DIR__ . '/../view',
+            'pdf' => __DIR__ . '/../view',
         ],
         'strategies' => [
             'ViewJsonStrategy'

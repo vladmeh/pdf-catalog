@@ -42,6 +42,12 @@ class PdfController extends AbstractActionController
 
     public function indexAction()
     {
+        return new ViewModel();
+    }
+
+
+    public function createAction()
+    {
         $id = $this->params()->fromRoute('id');
 
         $pdf = $this->pdfService;
