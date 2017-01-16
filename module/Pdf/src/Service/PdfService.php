@@ -79,8 +79,6 @@ class PdfService extends \TCPDF implements PdfServiceInterface
         parent::Output($name, $dest);
     }
 
-
-
     public function defaultSettingsPage()
     {
         $this->SetCreator('Alpha-Hydro');

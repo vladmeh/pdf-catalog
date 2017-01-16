@@ -12,6 +12,7 @@ namespace Pdf\Controller;
 
 use Pdf\Service\PdfServiceInterface;
 use Zend\Debug\Debug;
+use Zend\Http\Response;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
@@ -68,13 +69,15 @@ class PdfController extends AbstractActionController
         $xmlObject = simplexml_load_file($xmlFileDir.'/'.$xmlFileName);
         $pdf->content($xmlObject);
 
-        $file_dir = __DIR__.'/../../../../data/pdf';
+        $file_dir = __DIR__.'/../../../../public/data';
         if(!file_exists($file_dir))
             mkdir($file_dir, 0755, true);
 
         $file_name = 'catalog'.$id.'.pdf';
 
         $pdf->Output($file_dir.'/'.$file_name, 'F');
+
+        return new JsonModel(['_link' => 'data/'.$file_name]);
     }
 
     public function testAction()
