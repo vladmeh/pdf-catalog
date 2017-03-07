@@ -149,16 +149,18 @@ class PdfService extends \TCPDF implements PdfServiceInterface
                                     $this->setProduct($item);
                                 }
                             }
+                            //$this->Bookmark($level3->attributes()->name, 2 , 0, '', '', [0, 0, 0]);
                         }
                     }
+                    //$this->Bookmark($level2->attributes()->name, 1 , 0, '', 'B', [0, 0, 0]);
                 }
             }
+            //$this->Bookmark($level1->attributes()->name, 0 , '', '', 'B', [237, 133, 31]);
         }
 
-       //Debug::dump($this->outlines);die();
+        //Debug::dump($this->outlines);die();
 
         $this->tableOfContent();
-//
         return $this;
     }
 
