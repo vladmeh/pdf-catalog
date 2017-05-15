@@ -79,8 +79,6 @@ class PdfService extends \TCPDF implements PdfServiceInterface
         parent::Output($name, $dest);
     }
 
-
-
     public function defaultSettingsPage()
     {
         $this->SetCreator('Alpha-Hydro');
@@ -131,6 +129,8 @@ class PdfService extends \TCPDF implements PdfServiceInterface
     {
         $xmlElements = $xmlObject->category;
 
+        set_time_limit(1800);
+
         foreach ($xmlElements as $level1) {
             $this->setHeaderData('', 0, $level1->attributes()->name, '');
             $this->setImageFieldBookmark('fieldBookmark_'.(string) $level1->attributes()->id.'.png');
@@ -143,26 +143,28 @@ class PdfService extends \TCPDF implements PdfServiceInterface
                     if($level2->category){
                         foreach ($level2->category as $level3) {
                             $this->Bookmark($level3->attributes()->name, 2 , 0, '', '', [0, 0, 0]);
-                            //$this->Cell(0, 0, 'продуктов - '.count($level3->product), 0, 1, 'L');
+                            //$this->Cell(0, 0, 'продуктов - '.count($level3->setProduct), 0, 1, 'L');
                             if(0 != count($level3->product)){
                                 foreach ($level3->product as $item) {
-                                    $this->product($item);
+                                    $this->setProduct($item);
                                 }
                             }
+                            //$this->Bookmark($level3->attributes()->name, 2 , 0, '', '', [0, 0, 0]);
                         }
                     }
+                    //$this->Bookmark($level2->attributes()->name, 1 , 0, '', 'B', [0, 0, 0]);
                 }
             }
+            //$this->Bookmark($level1->attributes()->name, 0 , '', '', 'B', [237, 133, 31]);
         }
 
-       //Debug::dump($this->outlines);die();
+        //Debug::dump($this->outlines);die();
 
         $this->tableOfContent();
-//
         return $this;
     }
 
-    public function product(\SimpleXMLElement $xmlElement)
+    public function setProduct(\SimpleXMLElement $xmlElement)
     {
         $this->SetFont('arialnarrow', 'B', 16);
         $this->Cell(0, 0, $xmlElement->sku, 0, 1, 'L');
@@ -189,8 +191,35 @@ class PdfService extends \TCPDF implements PdfServiceInterface
             $this->SetX($this->x + 5);
         }
 
-        $this->SetY($this->getImageRBY()+5);
+        $this->setProductProperty($xmlElement->properties->property);
+
+        if ($this->y < $this->getImageRBY())
+            $this->SetY($this->getImageRBY());
         $this->Ln(5);
+
+        return $this;
+    }
+
+    /**
+     * @param \SimpleXMLElement[] $productProperties
+     * @return $this
+     */
+    public function setProductProperty($productProperties)
+    {
+        $x = $this->getImageRBX()+5;
+
+        if (!empty($productProperties)){
+            $w = array(30, $this->getPageWidth()-$this->original_rMargin-$x-30);
+            foreach ($productProperties as $productProperty) {
+                $this->SetFont('','B',8);
+                $this->MultiCell($w[0], 0, $productProperty->attributes()->name, 0, 'L', false, 0, $x, '', true, 0, false, true, 0);
+
+                $this->SetFont('','',8);
+                $this->MultiCell($w[1], 0, str_replace(["\r\n", "\n", "\r"],'. ',$productProperty), 0, 'L', false, 0, '', '', true, 0, false, true, 0);
+
+                $this->Ln();
+            }
+        }
 
         return $this;
     }

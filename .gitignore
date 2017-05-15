@@ -42,4 +42,8 @@ extras/documentation
 out
 gen
 data/
+<<<<<<< HEAD
 /composer.lock
+=======
+/public/data/
+>>>>>>> add0b1a51747d0ae7762e52d5a811400c6177bb5

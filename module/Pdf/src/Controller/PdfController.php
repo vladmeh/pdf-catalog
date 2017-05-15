@@ -12,6 +12,8 @@ namespace Pdf\Controller;
 
 use Pdf\Service\PdfServiceInterface;
 use Zend\Debug\Debug;
+use Zend\EventManager\EventManager;
+use Zend\Http\Response;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
@@ -42,6 +44,14 @@ class PdfController extends AbstractActionController
 
     public function indexAction()
     {
+        return new ViewModel();
+    }
+
+
+    public function createAction()
+    {
+        $id = $this->params()->fromRoute('id');
+
         $pdf = $this->pdfService;
         $pdf->defaultSettingsPage();
 
@@ -51,24 +61,48 @@ class PdfController extends AbstractActionController
         $html = $this->renderer->render($view);
         $pdf->introduction($html);
 
+        $xmlFileDir = __DIR__.'/../../../../data/xml';
+        $xmlFileName = 'catalog'.$id.'.xml';
+
         //Вынести в конструктор
         //Проверка на существование файла
         //Если файла нет перенаправление на создание файла
-        $xmlObject = simplexml_load_file(__DIR__.'/../../../../data/xml/test.xml');
+        $xmlObject = simplexml_load_file($xmlFileDir.'/'.$xmlFileName);
         $pdf->content($xmlObject);
 
-        $pdf->Output('/catalog.pdf', 'F');
+        $file_dir = __DIR__.'/../../../../public/data';
+        if(!file_exists($file_dir))
+            mkdir($file_dir, 0755, true);
+
+        $file_name = 'catalog'.$id.'.pdf';
+
+        $pdf->Output($file_dir.'/'.$file_name, 'F');
+
+        return new JsonModel(['_link' => 'data/'.$file_name]);
     }
 
     public function testAction()
     {
-       /* $i = 1;
-        while ($i <= 10) {
-            sleep(3);
-            $this->setProgress($i);
-        }*/
+        $id = $this->params()->fromRoute('id');
 
-        return new ViewModel();
+        $xmlFileDir = __DIR__.'/../../../../data/xml';
+        $xmlFileName = 'catalog'.$id.'.xml';
+
+        $reader = new \XMLReader();
+        $reader->open($xmlFileDir.'/'.$xmlFileName);
+        //Debug::dump($reader->xmlLang);
+
+        while($reader->read()) {
+            if($reader->nodeType == \XMLReader::ELEMENT) {
+                // если находим элемент <card>
+                if($reader->localName == 'product') {
+
+                    Debug::dump(simplexml_load_string($reader->readOuterXML()));
+
+                }
+            }
+        }
+        die();
     }
 
 
